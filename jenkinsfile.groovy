@@ -2,42 +2,40 @@ pipeline {
     agent any
 
     stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/K-luster/release_test.git'
+            }
+        }
+
         stage('Build') {
             steps {
-                sh 'echo "Building..."'
-                // 빌드 단계에서 수행할 작업을 추가할 수 있습니다.
+                sh 'mvn clean install'
             }
         }
 
-        stage('Test') {
+        stage('Docker Build') {
             steps {
-                sh 'echo "Testing..."'
-                // 테스트 단계에서 수행할 작업을 추가할 수 있습니다.
+                sh 'docker build -t your-docker-image:latest .'
             }
         }
 
-        stage('Deploy') {
+        stage('Docker Push') {
             steps {
-                sh 'echo "Deploying..."'
-                // 배포 단계에서 수행할 작업을 추가할 수 있습니다.
+                withCredentials([usernamePassword(credentialsId: 'your-docker-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
+                    sh 'docker push your-docker-image:latest'
+                }
             }
         }
-    }
 
-    post {
-        always {
-            sh 'echo "Post-build: Always"'
-            // 항상 수행되는 작업을 추가할 수 있습니다.
-        }
-
-        success {
-            sh 'echo "Post-build: Success"'
-            // 성공적으로 완료된 경우 수행되는 작업을 추가할 수 있습니다.
-        }
-
-        failure {
-            sh 'echo "Post-build: Failure"'
-            // 실패한 경우 수행되는 작업을 추가할 수 있습니다.
+        stage('Kubernetes Deploy') {
+            environment {
+                KUBECONFIG = credentials('your-kubeconfig-credentials')
+            }
+            steps {
+                sh 'kubectl apply -f your-kubernetes-deployment.yaml'
+            }
         }
     }
 }
