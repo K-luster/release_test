@@ -25,32 +25,32 @@ node {
 //    }
 //
 //    //dockerfile기반 빌드하는 stage ,git소스 root에 dockerfile이 있어야한다
-//    stage('Build image'){
-//        app = docker.build("cross9308/dockertest")
-//    }
+    stage('Build image'){
+        app = docker.build("Dockerfile")
+    }
 //
 //
 //    //docker image를 push하는 stage, 필자는 dockerhub에 이미지를 올렸으나 보통 private image repo를 별도 구축해서 사용하는것이 좋음
 //    //docker.withRegistry에 dockerhub는 앞서 설정한 dockerhub credentials의 ID이다.
-//    stage('Push image') {
-//        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
-//            app.push("${env.BUILD_NUMBER}")
-//            app.push("latest")
-//        }
-//    }
+    stage('Push image') {
+        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
+            app.push("${env.BUILD_NUMBER}")
+            app.push("latest")
+        }
+    }
 
     // kubernetes에 배포하는 stage, 배포할 yaml파일(필자의 경우 test.yaml)은 jenkinsfile과 마찬가지로 git소스 root에 위치시킨다.
     // kubeconfigID에는 앞서 설정한 Kubernetes Credentials를 입력하고 'sh'는 쿠버네티스 클러스터에 원격으로 실행시킬 명령어를 기술한다.
     stage('Execute kubectl') {
         withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-            sh 'kubectl --kubeconfig=$KUBECONFIG get pods'
+            sh 'kubectl —kubeconfig=$KUBECONFIG get pods'
 
             // 쉘 스크립트 실행 시 변수 사용
             def namespace = 'default'
-            sh "kubectl --kubeconfig=$KUBECONFIG get pods -n ${namespace}"
+            sh "kubectl —kubeconfig=$KUBECONFIG get deployments -n ${namespace}"
 
             // 결과를 변수에 저장
-            def result = sh(returnStdout: true, script: "kubectl --kubeconfig=$KUBECONFIG get pods").trim()
+            def result = sh(returnStdout: true, script: "kubectl —kubeconfig=$KUBECONFIG get deployments").trim()
             println "kubectl 결과: ${result}"
         }
     }
