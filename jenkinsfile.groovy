@@ -43,11 +43,11 @@ node {
     // kubeconfigID에는 앞서 설정한 Kubernetes Credentials를 입력하고 'sh'는 쿠버네티스 클러스터에 원격으로 실행시킬 명령어를 기술한다.
     stage('Execute kubectl') {
         withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-            sh 'kubectl —-kubeconfig=$KUBECONFIG get pods'
+            sh 'kubectl —kubeconfig=$KUBECONFIG get pods'
 
             // 쉘 스크립트 실행 시 변수 사용
             def namespace = 'default'
-            sh "kubectl —-kubeconfig=$KUBECONFIG get deployments -n ${namespace}"
+            sh "kubectl —kubeconfig=$KUBECONFIG get deployments -n ${namespace}"
 
             // 결과를 변수에 저장
             def result = sh(returnStdout: true, script: "kubectl —kubeconfig=$KUBECONFIG get deployments").trim()
