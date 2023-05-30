@@ -47,10 +47,10 @@ node {
 
             // 쉘 스크립트 실행 시 변수 사용
             def namespace = 'default'
-            sh "kubectl —kubeconfig=$KUBECONFIG get deployments -n ${namespace}"
+            sh "kubectl —kubeconfig=$KUBECONFIG get pods -n ${namespace}"
 
             // 결과를 변수에 저장
-            def result = sh(returnStdout: true, script: "kubectl —kubeconfig=$KUBECONFIG get deployments").trim()
+            def result = sh(returnStdout: true, script: "kubectl —kubeconfig=$KUBECONFIG get pods").trim()
             println "kubectl 결과: ${result}"
         }
     }
