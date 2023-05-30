@@ -52,6 +52,8 @@ node {
             // 결과를 변수에 저장
             def result = sh(returnStdout: true, script: "kubectl --kubeconfig=$KUBECONFIG get pods").trim()
             println "kubectl 결과: ${result}"
+
+            sh "kubectl create deployment kluster-example --image=nginx"
         }
     }
 
